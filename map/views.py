@@ -59,7 +59,7 @@ def index(request):
 def add_all_markers(request):
     api_data = get_response()
 
-    m = Map(location=[0, 0], zoom_start=2, max_bounds=True)
+    m = Map(location=[0, 0], zoom_start=2, min_zoom=2, max_bounds=True)
     add_markers(m, api_data)
 
     m = m._repr_html_()
