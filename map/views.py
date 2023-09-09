@@ -6,6 +6,7 @@ from .forms import SearchForm
 from .models import Api, Search
 from requests import get
 
+
 def add_latest_api_data(request=None):
     api_key = AIRLABS_API_KEY
     url = f'https://airlabs.co/api/v9/flights?_view=array&_fields=flag,lat,lng,alt,dir,airline_icao,aircraft_icao,dep_icao,arr_icao,status&api_key={api_key}'
