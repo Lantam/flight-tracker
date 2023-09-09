@@ -1,14 +1,13 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from flight_tracker.settings import AIRLABS_API_KEY
-from folium import IFrame, Map, Marker, Popup, Icon
+from folium import Icon, IFrame, Map, Marker, Popup
 from .forms import SearchForm
-from .models import Search, Api
+from .models import Api, Search
 from requests import get
 
-def get_latest_api_data(request=None):
+def add_latest_api_data(request=None):
     api_key = AIRLABS_API_KEY
-    
     url = f'https://airlabs.co/api/v9/flights?_view=array&_fields=flag,lat,lng,alt,dir,airline_icao,aircraft_icao,dep_icao,arr_icao,status&api_key={api_key}'
     response = get(url).json()
     Api.objects.create(response=response)
@@ -20,7 +19,7 @@ def get_response():
     try:
         return Api.objects.latest('response').response
     except ObjectDoesNotExist:
-        get_latest_api_data()
+        add_latest_api_data()
         return Api.objects.latest('response').response
 
 def filter_input(m, api_data):
