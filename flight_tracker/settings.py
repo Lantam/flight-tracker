@@ -44,8 +44,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
     'map.apps.MapConfig',
+    'django_celery_results',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -85,7 +88,7 @@ WSGI_APPLICATION = 'flight_tracker.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "flight_tracker",
+        "NAME": "postgres",
         "USER": "postgres",
         "PASSWORD": "leon",
         "HOST": "localhost",
@@ -141,4 +144,22 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10
 }
 
-AIRLABS_API_KEY = getenv("AIRLABS_API_KEY")
+
+AIRLABS_API_KEY = getenv('AIRLABS_API_KEY')
+
+AIRLABS_BASE_URL = 'https://airlabs.co/api/v9/flights'
+
+
+# Celery Settings
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Berlin'
+
+CELERY_RESULT_BACKEND = 'django-db'
+
+# Celery Beat Settings
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
