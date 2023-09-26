@@ -1,7 +1,7 @@
 from django.db import models
 
 class Api(models.Model):
-    registration_number = models.CharField(max_length=10)
+    registration_number = models.CharField(max_length=10, null=True)
     country_code = models.CharField(max_length=2, null=True)
     latitude = models.FloatField(null=True)
     longitude = models.FloatField(null=True)
