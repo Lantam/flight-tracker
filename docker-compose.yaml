@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+    backend:
+        container_name: flight_tracker_backend
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        command: sh -c 'python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --timeout 90 --reload --bind 0.0.0.0:8000 --workers 8 flight_tracker.wsgi'
+        volumes:
+            - ./flight_tracker:/flight_tracker
+        env_file: .env
+        expose:
+            - '8000'
+        restart: always
