@@ -17,7 +17,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-load_dotenv()
+load_dotenv('../../.env.prod')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,12 +27,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-17db1htf=jqr6=kr3l)ok16_vd2ik%2#zz=^p5x9gc-v7t2=ur'
+SECRET_KEY = getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(getenv("DEBUG", default=0))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = getenv("DJANGO_ALLOWED_HOSTS").split(" ")
 
 
 # Application definition
@@ -87,12 +87,12 @@ WSGI_APPLICATION = 'flight_tracker.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "leon",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "ENGINE": getenv('DATABASE_ENGINE'),
+        "NAME": getenv('DATABASE_NAME'),
+        "USER": getenv('DATABASE_USER'),
+        "PASSWORD": getenv('DATABASE_PASSWORD'),
+        "HOST": getenv('DATABASE_HOST'),
+        "PORT": getenv('DATABASE_PORT'),
     }
 }
 
@@ -131,7 +131,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'mediafiles'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -146,7 +152,6 @@ REST_FRAMEWORK = {
 
 
 AIRLABS_API_KEY = getenv('AIRLABS_API_KEY')
-
 AIRLABS_BASE_URL = 'https://airlabs.co/api/v9/flights'
 
 
@@ -163,3 +168,6 @@ CELERY_RESULT_BACKEND = 'django-db'
 # Celery Beat Settings
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+
+CSRF_TRUSTED_ORIGINS = ["http://localhost:1337"]

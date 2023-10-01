@@ -5,11 +5,24 @@ services:
         container_name: flight_tracker_backend
         build:
             context: .
-            dockerfile: ./Dockerfile
-        command: sh -c 'python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --timeout 90 --reload --bind 0.0.0.0:8000 --workers 8 flight_tracker.wsgi'
+            dockerfile: src/Dockerfile
+        command: python manage.py runserver 0.0.0.0:8000
         volumes:
-            - ./flight_tracker:/flight_tracker
-        env_file: .env
-        expose:
-            - '8000'
-        restart: always
+            - ./src:/usr/src/
+        env_file: ./.env.dev
+        ports:
+            - 8000:8000
+        depends_on:
+            - db
+    db:
+        image: postgres:16
+        container_name: postgres_db
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        environment:
+            DATABASE_NAME: postgres
+            DATABASE_USER: postgres
+            POSTGRES_PASSWORD: leon
+
+volumes:
+    postgres_data:
