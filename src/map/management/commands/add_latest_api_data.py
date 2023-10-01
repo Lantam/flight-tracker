@@ -42,22 +42,3 @@ class Command(BaseCommand):
                         'status': response_item.get('status')
                     }
                 )
-
-
-        # if response is not None:
-        #     Api.objects.bulk_create([
-        #         Api(
-        #             registration_number=response_item.get('reg_number'),
-        #             country_code=response_item.get('flag'),
-        #             latitude=response_item.get('lat'),
-        #             longitude=response_item.get('lng'),
-        #             elevation=response_item.get('alt'),
-        #             head_direction=response_item.get('dir'),
-        #             airline_icao=response_item.get('airline_icao'),
-        #             aircraft_icao=response_item.get('aircraft_icao'),
-        #             departure_icao=response_item.get('dep_icao'),
-        #             arrival_icao=response_item.get('arr_icao'),
-        #             status=response_item.get('status')
-        #         )
-        #         for response_item in response
-        #     ])

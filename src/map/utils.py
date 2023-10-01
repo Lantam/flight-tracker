@@ -5,7 +5,7 @@ from map.models import Api
 
 
 class AirlabsSDK:
-    
+
     def get_latest_api_data(self, fields: list = []) -> dict:
         api_key = AIRLABS_API_KEY
         field_names = ''.join(fields)

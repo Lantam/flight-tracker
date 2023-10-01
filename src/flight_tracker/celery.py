@@ -5,6 +5,7 @@ from celery import Celery
 from celery.schedules import crontab
 from django.conf import settings
 
+
 environ.setdefault('DJANGO_SETTINGS_MODULE', 'flight_tracker.settings')
 
 app = Celery('flight_tracker')
@@ -23,6 +24,7 @@ app.conf.beat_schedule = {
 }
 
 app.autodiscover_tasks()
+
 
 @app.task(bind=True)
 def debug_task(self):

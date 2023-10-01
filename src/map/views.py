@@ -5,7 +5,6 @@ from .forms import SearchForm
 from .models import Api, Search
 
 
-
 api_data = [
     [
         row.registration_number,
@@ -31,6 +30,7 @@ def filter_input(m, api_data):
     except ObjectDoesNotExist:
         pass
 
+
 def index(request):
     m = Map(location=[0, 0], zoom_start=2, min_zoom=2, max_bounds=True)
 
@@ -47,7 +47,7 @@ def index(request):
             return render(request, 'index.html', context)
     else:
         form = SearchForm()
-    
+
     m = m._repr_html_()
     context = {
         'm': m,
@@ -66,6 +66,7 @@ def add_all_markers(request):
         'm': m,
     }
     return render(request, 'index.html', context)
+
 
 def add_markers(m, api_data, filter=None):
     for i in api_data:
