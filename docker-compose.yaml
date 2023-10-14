@@ -5,7 +5,7 @@ services:
         container_name: flight_tracker_backend
         build:
             context: ./src
-            dockerfile: Dockerfile.prod
+            dockerfile: Dockerfile
         command: sh -c 'python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --timeout 90 --reload --bind 0.0.0.0:8000 --workers 8 flight_tracker.wsgi'
         volumes:
             - static_volume:/home/src/backend/staticfiles
@@ -27,33 +27,33 @@ services:
         expose:
             - 5432
         restart: always
-    # worker:
-    #     build:
-    #         context: ./src
-    #         dockerfile: Dockerfile.prod
-    #     entrypoint: /home/src/backend/worker-entrypoint.sh
-    #     volumes:
-    #         - static_volume:/home/src/backend/staticfiles
-    #         - media_volume:/home/src/backend/mediafiles
-    #     env_file:
-    #         - ./.env.prod
-    #     depends_on:
-    #         - redis
-    # celery-beat:
-    #     build:
-    #         context: ./src
-    #         dockerfile: Dockerfile.prod
-    #     command: celery -A flight_tracker beat -l info
-    #     volumes:
-    #         - ./src/:/usr/src/app/
-    #     env_file:
-    #         - ./.env.prod
-    #     depends_on:
-    #         - redis
-    # redis:
-    #     image: redis:7.2 
-    #     expose:
-    #         - 6379
+    worker:
+        build:
+            context: ./src
+            dockerfile: Dockerfile
+        command: celery -A flight_tracker worker -l info
+        volumes:
+            - static_volume:/home/src/backend/staticfiles
+            - media_volume:/home/src/backend/mediafiles
+        env_file:
+            - ./.env.prod
+        depends_on:
+            - redis
+    celery-beat:
+        build:
+            context: ./src
+            dockerfile: Dockerfile
+        command: celery -A flight_tracker beat -l info
+        volumes:
+            - ./src/:/usr/src/app/
+        env_file:
+            - ./.env.prod
+        depends_on:
+            - redis
+    redis:
+        image: redis:7.2 
+        expose:
+            - 6379
     nginx:
         container_name: flight_tracker_nginx
         build:
