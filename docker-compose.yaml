@@ -62,6 +62,7 @@ services:
         volumes:
             - ./src/staticfiles:/home/src/backend/staticfiles
             - ./src/mediafiles:/home/src/backend/mediafiles
+            - ./src/templates:/home/src/backend/templates
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf
         ports:
             - '80:80'
