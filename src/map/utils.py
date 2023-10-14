@@ -1,7 +1,6 @@
 from requests import get
 
 from flight_tracker.settings import AIRLABS_API_KEY, AIRLABS_BASE_URL
-from map.models import Api
 
 
 class AirlabsSDK:

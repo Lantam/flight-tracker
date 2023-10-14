@@ -1,5 +1,4 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.management import call_command
 from django.shortcuts import render
 from folium import Icon, IFrame, Map, Marker, Popup
 from .forms import SearchForm
