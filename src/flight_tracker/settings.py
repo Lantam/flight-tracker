@@ -17,7 +17,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-load_dotenv('../../.env.prod')
+load_dotenv('C:/Users/Anwender/Documents/GitHub/flight-tracker/.env.prod')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,7 +32,7 @@ SECRET_KEY = getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(getenv("DEBUG", default=0))
 
-ALLOWED_HOSTS = getenv("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = getenv("DJANGO_ALLOWED_HOSTS", default="").split()
 
 
 # Application definition

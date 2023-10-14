@@ -1,28 +1,76 @@
-version: '3'
+version: '3.11.2'
 
 services:
     backend:
         container_name: flight_tracker_backend
         build:
-            context: .
-            dockerfile: src/Dockerfile
-        command: python manage.py runserver 0.0.0.0:8000
+            context: ./src
+            dockerfile: Dockerfile.prod
+        command: sh -c 'python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --timeout 90 --reload --bind 0.0.0.0:8000 --workers 8 flight_tracker.wsgi'
         volumes:
-            - ./src:/usr/src/
-        env_file: ./.env.dev
-        ports:
-            - 8000:8000
+            - static_volume:/home/src/backend/staticfiles
+            - media_volume:/home/src/backend/mediafiles
+        expose:
+            - '8000'
+        env_file:
+            - ./.env.prod
         depends_on:
             - db
+        restart: always
     db:
+        container_name: flight_tracker_db
         image: postgres:16
-        container_name: postgres_db
         volumes:
-            - postgres_data:/var/lib/postgresql/data
-        environment:
-            DATABASE_NAME: postgres
-            DATABASE_USER: postgres
-            POSTGRES_PASSWORD: leon
+            - postgres_data:/var/lib/postgresql/data/
+        env_file:
+            - ./.env.prod.db
+        expose:
+            - 5432
+        restart: always
+    # worker:
+    #     build:
+    #         context: ./src
+    #         dockerfile: Dockerfile.prod
+    #     entrypoint: /home/src/backend/worker-entrypoint.sh
+    #     volumes:
+    #         - static_volume:/home/src/backend/staticfiles
+    #         - media_volume:/home/src/backend/mediafiles
+    #     env_file:
+    #         - ./.env.prod
+    #     depends_on:
+    #         - redis
+    # celery-beat:
+    #     build:
+    #         context: ./src
+    #         dockerfile: Dockerfile.prod
+    #     command: celery -A flight_tracker beat -l info
+    #     volumes:
+    #         - ./src/:/usr/src/app/
+    #     env_file:
+    #         - ./.env.prod
+    #     depends_on:
+    #         - redis
+    # redis:
+    #     image: redis:7.2 
+    #     expose:
+    #         - 6379
+    nginx:
+        container_name: flight_tracker_nginx
+        build:
+            context: ./nginx
+            dockerfile: Dockerfile
+        volumes:
+            - ./src/staticfiles:/home/src/backend/staticfiles
+            - ./src/mediafiles:/home/src/backend/mediafiles
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+        ports:
+            - '80:80'
+        expose:
+            - '80'
+        depends_on:
+            - backend
 
 volumes:
     postgres_data:
+    static_volume:
+    media_volume:

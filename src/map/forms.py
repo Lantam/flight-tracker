@@ -1,5 +1,5 @@
 from django import forms
-from .models import Search
+from map.models import Search
 
 
 class SearchForm(forms.ModelForm):

@@ -1,10 +1,16 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management import call_command
 from django.shortcuts import render
 from folium import Icon, IFrame, Map, Marker, Popup
 from .forms import SearchForm
 from .models import Api, Search
 
 
+# tries = 2
+# for i in range(tries):
+#     try:
+        # call_command('makemigrations')
+        # call_command('migrate')
 api_data = [
     [
         row.registration_number,
@@ -21,6 +27,17 @@ api_data = [
     ]
     for row in Api.objects.all()
 ]
+    # except ObjectDoesNotExist:
+        # if i == 0:
+        #     call_command('makemigrations')
+        #     call_command('migrate')
+        # if i == 1:
+        #     call_command('add_latest_api_data')
+    #     if i < tries - 1:
+    #         continue
+    #     else:
+    #         raise
+    # break
 
 
 def filter_input(m, api_data):
