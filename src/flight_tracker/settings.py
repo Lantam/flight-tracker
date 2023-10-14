@@ -17,7 +17,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
-load_dotenv('C:/Users/Anwender/Documents/GitHub/flight-tracker/.env.prod')
+load_dotenv('C:/Users/Anwender/Documents/GitHub/flight-tracker/.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -170,4 +170,4 @@ CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:1337"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:80"]
