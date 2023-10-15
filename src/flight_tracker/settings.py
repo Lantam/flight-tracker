@@ -30,9 +30,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(getenv("DEBUG", default=0))
+DEBUG = bool(getenv('DEBUG', default=0))
 
-ALLOWED_HOSTS = getenv("DJANGO_ALLOWED_HOSTS", default="").split()
+ALLOWED_HOSTS = getenv('DJANGO_ALLOWED_HOSTS', default='').split()
 
 
 # Application definition
@@ -170,4 +170,4 @@ CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:80"]
+CSRF_TRUSTED_ORIGINS = ['http://localhost:80']

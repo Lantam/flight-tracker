@@ -28,6 +28,7 @@ services:
             - 5432
         restart: always
     worker:
+        container_name: flight_tracker_worker
         build:
             context: ./src
             dockerfile: Dockerfile
@@ -40,6 +41,7 @@ services:
         depends_on:
             - redis
     celery-beat:
+        container_name: flight_tracker_celery_beat
         build:
             context: ./src
             dockerfile: Dockerfile
@@ -51,9 +53,10 @@ services:
         depends_on:
             - redis
     redis:
+        container_name: flight_tracker_redis
         image: redis:7.2 
         expose:
-            - 6379
+            - '6379'
     nginx:
         container_name: flight_tracker_nginx
         build:
