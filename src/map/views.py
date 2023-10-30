@@ -13,15 +13,15 @@ redis = get_redis_connection()
 
 def process_input(request, m, api_data, filter=None, form=None):
     if filter is not None:
-        decoded_data = {key.decode(): loads(value) for key, value in api_data.items()}
-        filtered_data = [data for data in decoded_data.values() if filter in data.values()]
+        filtered_data = [data for data in (loads(value) for value in api_data.values()) if filter in data.values()]
         add_markers(m, filtered_data)
     else:
-        decoded_data = {key.decode(): loads(value) for key, value in api_data.items()}
+        decoded_data = [data for data in (loads(value) for value in api_data.values())]
+
         add_markers(m, decoded_data)
 
     represent_as_html = m._repr_html_()
-    context = {'m': represent_as_html,}
+    context = {'m': represent_as_html, }
     if form is not None:
         context['form'] = form
     return render(request, 'index.html', context)
@@ -38,7 +38,7 @@ def index(request):
         form = SearchForm()
 
     represent_as_html = m._repr_html_()
-    context = {'m': represent_as_html, 'form': form,}
+    context = {'m': represent_as_html, 'form': form, }
     return render(request, 'index.html', context)
 
 
@@ -47,7 +47,7 @@ def add_all_markers(request):
 
 
 def add_markers(m, api_data):
-    for i in api_data.values():
+    for i in api_data:
         values = list(i.values())
         html = f'''
             Registration Number: {values[0]}<br>
