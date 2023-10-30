@@ -1,104 +1,73 @@
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 from folium import Icon, IFrame, Map, Marker, Popup
-from .forms import SearchForm
-from .models import Api, Search
+from map.forms import SearchForm
+from map.models import Api, Search
+from django_redis import get_redis_connection
+from json import loads
 
 
-api_data = [
-    [
-        row.registration_number,
-        row.country_code,
-        row.latitude,
-        row.longitude,
-        row.elevation,
-        row.head_direction,
-        row.airline_icao,
-        row.aircraft_icao,
-        row.departure_icao,
-        row.arrival_icao,
-        row.status,
-    ]
-    for row in Api.objects.all()
-]
+m = Map(location=[0, 0], zoom_start=2, min_zoom=2, max_bounds=True)
+
+redis = get_redis_connection()
 
 
-def filter_input(m, api_data):
-    try:
-        filter = Search.objects.last().location
-        add_markers(m, api_data, filter=filter)
-    except ObjectDoesNotExist:
-        pass
+def process_input(request, m, api_data, filter=None, form=None):
+    if filter is not None:
+        decoded_data = {key.decode(): loads(value) for key, value in api_data.items()}
+        filtered_data = [data for data in decoded_data.values() if filter in data.values()]
+        add_markers(m, filtered_data)
+    else:
+        decoded_data = {key.decode(): loads(value) for key, value in api_data.items()}
+        add_markers(m, decoded_data)
+
+    represent_as_html = m._repr_html_()
+    context = {'m': represent_as_html,}
+    if form is not None:
+        context['form'] = form
+    return render(request, 'index.html', context)
 
 
 def index(request):
-    m = Map(location=[0, 0], zoom_start=2, min_zoom=2, max_bounds=True)
-
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
             form.save()
-            filter_input(m, api_data)
-            m = m._repr_html_()
-            context = {
-                'm': m,
-                'form': form,
-            }
-            return render(request, 'index.html', context)
+            filter = Search.objects.last().location
+            return process_input(request, m, redis.hgetall("cache"), filter, form)
     else:
         form = SearchForm()
 
-    m = m._repr_html_()
-    context = {
-        'm': m,
-        'form': form,
-    }
+    represent_as_html = m._repr_html_()
+    context = {'m': represent_as_html, 'form': form,}
     return render(request, 'index.html', context)
 
 
 def add_all_markers(request):
-
-    m = Map(location=[0, 0], zoom_start=2, min_zoom=2, max_bounds=True)
-    add_markers(m, api_data)
-
-    m = m._repr_html_()
-    context = {
-        'm': m,
-    }
-    return render(request, 'index.html', context)
+    return process_input(request, m, redis.hgetall("cache"))
 
 
-def add_markers(m, api_data, filter=None):
-    for i in api_data:
+def add_markers(m, api_data):
+    for i in api_data.values():
+        values = list(i.values())
         html = f'''
-            Registration Number: {i[0]}<br>
-            Country Code: {i[1]}<br>
-            Longitude: {i[2]}<br>
-            Latitude: {i[3]}<br>
-            Elevation: {i[4]}<br>
-            Head Direction: {i[5]}<br>
-            Airline ICAO: {i[6]}<br>
-            Aircraft ICAO: {i[7]}<br>
-            Departure ICAO: {i[8]}<br>
-            Arrival ICAO: {i[9]}<br>
-            Status: {i[10]}<br>
+            Registration Number: {values[0]}<br>
+            Country Code: {values[1]}<br>
+            Longitude: {values[2]}<br>
+            Latitude: {values[3]}<br>
+            Elevation: {values[4]}<br>
+            Head Direction: {values[5]}<br>
+            Airline ICAO: {values[6]}<br>
+            Aircraft ICAO: {values[7]}<br>
+            Departure ICAO: {values[8]}<br>
+            Arrival ICAO: {values[9]}<br>
+            Status: {values[10]}<br>
         '''
         iframe = IFrame(html, width=200, height=200)
         popup = Popup(iframe, max_width=200)
 
-        if filter is not None:
-            for j in i:
-                if str(j) == str(filter):
-                    Marker(
-                        [i[2], i[3]],
-                        tooltip='Click for more',
-                        popup=popup,
-                        icon=Icon(icon='plane', angle=90),
-                    ).add_to(m)
-        else:
-            Marker(
-                [i[2], i[3]],
-                tooltip='Click for more',
-                popup=popup,
-                icon=Icon(icon='plane', angle=90),
-            ).add_to(m)
+        Marker(
+            [values[2], values[3]],
+            tooltip='Click for more',
+            popup=popup,
+            icon=Icon(icon='plane', angle=90),
+        ).add_to(m)

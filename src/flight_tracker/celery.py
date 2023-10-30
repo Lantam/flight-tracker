@@ -15,12 +15,12 @@ app.conf.update(timezone='Europe/Berlin')
 
 app.config_from_object(settings, namespace='CELERY')
 
-# Celery Beat Settings
+
 app.conf.beat_schedule = {
     'run-api-data-command-every-hour': {
         'task': 'map.tasks.run_api_data_command',
-        'schedule': crontab(minute=0)
-    }
+        'schedule': crontab(minute=0),
+    },
 }
 
 app.autodiscover_tasks()

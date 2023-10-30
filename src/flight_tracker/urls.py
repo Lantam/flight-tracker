@@ -1,8 +1,8 @@
 from django.urls import path
-from map import views
+from map.views import index, add_all_markers
 
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('add_all_markers', views.add_all_markers, name='add_all_markers'),
+    path('', index, name='index'),
+    path('add_all_markers', add_all_markers, name='add_all_markers'),
 ]

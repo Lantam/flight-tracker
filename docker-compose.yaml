@@ -6,7 +6,7 @@ services:
         build:
             context: ./src
             dockerfile: Dockerfile
-        command: sh -c 'python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --timeout 90 --reload --bind 0.0.0.0:8000 --workers 8 flight_tracker.wsgi'
+        command: sh -c 'python manage.py migrate && python manage.py add_latest_api_data && python manage.py store_data_in_redis && python manage.py collectstatic --noinput && gunicorn --timeout 90 --reload --bind 0.0.0.0:8000 --workers 8 flight_tracker.wsgi'
         volumes:
             - static_volume:/home/src/backend/staticfiles
             - media_volume:/home/src/backend/mediafiles

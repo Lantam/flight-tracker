@@ -87,12 +87,23 @@ WSGI_APPLICATION = 'flight_tracker.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": getenv('DATABASE_ENGINE'),
-        "NAME": getenv('DATABASE_NAME'),
-        "USER": getenv('DATABASE_USER'),
-        "PASSWORD": getenv('DATABASE_PASSWORD'),
-        "HOST": getenv('DATABASE_HOST'),
-        "PORT": getenv('DATABASE_PORT'),
+        "ENGINE": getenv('POSTGRES_ENGINE'),
+        "NAME": getenv('POSTGRES_NAME'),
+        "USER": getenv('POSTGRES_USER'),
+        "PASSWORD": getenv('POSTGRES_PASSWORD'),
+        "HOST": getenv('POSTGRES_HOST'),
+        "PORT": getenv('POSTGRES_PORT'),
+    }
+}
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
     }
 }
 
@@ -157,7 +168,7 @@ AIRLABS_BASE_URL = 'https://airlabs.co/api/v9/flights'
 
 # Celery Settings
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
