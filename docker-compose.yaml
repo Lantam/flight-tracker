@@ -52,6 +52,7 @@ services:
             - .env
         depends_on:
             - redis
+        restart: always
     redis:
         container_name: flight_tracker_redis
         image: redis:7.2 
