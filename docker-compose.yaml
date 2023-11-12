@@ -8,8 +8,8 @@ services:
             dockerfile: Dockerfile
         command: sh -c 'python manage.py migrate && python manage.py add_latest_api_data && python manage.py store_data_in_redis && python manage.py collectstatic --noinput && gunicorn --timeout 90 --reload --bind 0.0.0.0:8000 --workers 8 flight_tracker.wsgi'
         volumes:
-            - static_volume:/home/src/backend/staticfiles
-            - media_volume:/home/src/backend/mediafiles
+            - static_volume:/home/src/backend/static
+            - media_volume:/home/src/backend/media
         expose:
             - '8000'
         env_file:
@@ -34,8 +34,8 @@ services:
             dockerfile: Dockerfile
         command: celery -A flight_tracker worker -l info
         volumes:
-            - static_volume:/home/src/backend/staticfiles
-            - media_volume:/home/src/backend/mediafiles
+            - static_volume:/home/src/backend/static
+            - media_volume:/home/src/backend/media
         env_file:
             - .env
         depends_on:
@@ -64,8 +64,8 @@ services:
             context: ./nginx
             dockerfile: Dockerfile
         volumes:
-            - ./src/staticfiles:/home/src/backend/staticfiles
-            - ./src/mediafiles:/home/src/backend/mediafiles
+            - ./src/static:/home/src/backend/static
+            - ./src/media:/home/src/backend/media
             - ./src/templates:/home/src/backend/templates
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf
         ports:
