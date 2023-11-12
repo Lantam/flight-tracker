@@ -14,9 +14,6 @@ export const addMarkersOnZoomMove = (map, csrftoken) => {
         let zoomLevel = map.getZoom();
         let bounds = map.getBounds();
 
-        console.log(zoomLevel);
-        console.log(bounds);
-
         fetch('get_zoom_level_bounds', {
             method: 'POST',
             credentials: 'same-origin',
@@ -34,9 +31,9 @@ export const addMarkersOnZoomMove = (map, csrftoken) => {
                         map.removeLayer(layer);
                     }
                 });
-                for (let dat of data) {
-                    console.log(dat);
-                    L.marker([dat['latitude'], dat['longitude']]).addTo(map);
+
+                for (let markerData of data) {
+                    L.marker([markerData['latitude'], markerData['longitude']]).addTo(map);
                 }
             })
             .catch(error => {

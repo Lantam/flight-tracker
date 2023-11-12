@@ -28,16 +28,14 @@ document.getElementById('search-form').addEventListener('submit', function (even
     })
     .then(response => response.json())
     .then(data => {
-        var markerData = data.markers;
-
         map.eachLayer(function (layer) {
             if (layer instanceof L.Marker) {
                 map.removeLayer(layer);
             }
         });
 
-        for (var i = 0; i < markerData.length; i++) {
-            L.marker([markerData[i].latitude, markerData[i].longitude]).addTo(map);
+        for (let markerData of data) {
+            L.marker([markerData['latitude'], markerData['longitude']]).addTo(map);
         }
     })
     .catch(error => {

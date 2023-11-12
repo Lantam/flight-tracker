@@ -28,9 +28,7 @@ class Command(BaseCommand):
         if response is not None:
             for response_item in response:
                 if response_item.get('reg_number') is not None:
-                    registration_number = response_item.get('reg_number')
-                    self.stdout.write(self.style.SUCCESS(f"Processing registration_number: {registration_number}"))
-                    obj, created = Api.objects.update_or_create(
+                    Api.objects.update_or_create(
                         registration_number=response_item.get('reg_number'),
                         defaults={
                             'country_code': response_item.get('flag'),
@@ -45,4 +43,3 @@ class Command(BaseCommand):
                             'status': response_item.get('status')
                         }
                     )
-                    self.stdout.write(self.style.SUCCESS(f"Object created: {created}"))

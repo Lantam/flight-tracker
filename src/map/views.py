@@ -35,7 +35,7 @@ def index(request):
         form = SearchForm()
 
     context = {'form': form, }
-    return render(request, 'map.html', context)
+    return render(request, 'index.html', context)
 
 
 def add_markers(filter=None, bounds=None, zoom_level=None):
