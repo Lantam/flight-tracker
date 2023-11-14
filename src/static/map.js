@@ -9,12 +9,26 @@ export const initializeMap = () => {
     return map;
 };
 
+
+export const updateMarkers = (map, data) => {
+    map.eachLayer(function (layer) {
+        if (layer instanceof L.Marker) {
+            map.removeLayer(layer);
+        }
+    });
+
+    for (let markerData of data) {
+        L.marker([markerData.latitude, markerData.longitude]).addTo(map);
+    }
+}
+
+
 export const addMarkersOnZoomMove = (map, csrftoken) => {
     map.on('zoomend moveend', function () {
         let zoomLevel = map.getZoom();
         let bounds = map.getBounds();
 
-        fetch('get_zoom_level_bounds', {
+        fetch('process-request', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -24,20 +38,12 @@ export const addMarkersOnZoomMove = (map, csrftoken) => {
             },
             body: JSON.stringify({ zoom_level: zoomLevel, bounds: bounds }),
         })
-            .then(response => response.json())
-            .then(data => {
-                map.eachLayer(function (layer) {
-                    if (layer instanceof L.Marker) {
-                        map.removeLayer(layer);
-                    }
-                });
-
-                for (let markerData of data) {
-                    L.marker([markerData['latitude'], markerData['longitude']]).addTo(map);
-                }
-            })
-            .catch(error => {
-                console.log('Error: ', error);
-            });
+        .then(response => response.json())
+        .then(data => {
+            updateMarkers(map, data.markers);
+        })
+        .catch(error => {
+            console.log('Error: ', error);
+        });
     });
 };

@@ -28,15 +28,33 @@ document.getElementById('search-form').addEventListener('submit', function (even
     })
     .then(response => response.json())
     .then(data => {
-        map.eachLayer(function (layer) {
-            if (layer instanceof L.Marker) {
-                map.removeLayer(layer);
-            }
-        });
+        mapFunctions.updateMarkers(map, data.markers);
+    })
+    .catch(error => {
+        console.log('Error: ', error);
+    });
+});
 
-        for (let markerData of data) {
-            L.marker([markerData['latitude'], markerData['longitude']]).addTo(map);
-        }
+
+document.getElementById('clear_filter').addEventListener('click', function (event) {
+    event.preventDefault();
+
+    let zoomLevel = map.getZoom();
+    let bounds = map.getBounds();
+    
+    fetch('clear-filter', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({ zoom_level: zoomLevel, bounds: bounds }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        mapFunctions.updateMarkers(map, data.markers);
     })
     .catch(error => {
         console.log('Error: ', error);

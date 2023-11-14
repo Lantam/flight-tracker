@@ -3,24 +3,37 @@ from map.forms import SearchForm
 from map.models import Search
 from django_redis import get_redis_connection
 from json import loads
-from django.http import JsonResponse, HttpResponseBadRequest
-from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
 
 
-@csrf_exempt
 def get_zoom_level_bounds(request):
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        if request.method == 'POST':
-            data = loads(request.body.decode('utf-8'))
-            zoom_level = data.get('zoom_level')
-            bounds = data.get('bounds')
+    data = loads(request.body.decode('utf-8'))
+    zoom_level = data.get('zoom_level')
+    bounds = data.get('bounds')
 
-            end_data = add_markers(bounds=bounds, zoom_level=zoom_level)
+    return zoom_level, bounds
 
-            return JsonResponse(end_data, safe=False)
-        return JsonResponse({'status': 'Invalid request'}, status=400)
+
+@csrf_protect
+def process_request(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'POST':
+        zoom_level, bounds = get_zoom_level_bounds(request)
+        marker_data = add_markers(filter=request.session.get('filter'), bounds=bounds, zoom_level=zoom_level)
+        return JsonResponse({'status': 'success', 'markers': marker_data})
     else:
-        return HttpResponseBadRequest('Invalid request')
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+@csrf_protect
+def clear_filter(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'POST':
+        request.session.pop('filter', None)
+        zoom_level, bounds = get_zoom_level_bounds(request)
+        marker_data = add_markers(bounds=bounds, zoom_level=zoom_level)
+        return JsonResponse({'status': 'success', 'markers': marker_data})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
 def index(request):
@@ -28,9 +41,9 @@ def index(request):
         form = SearchForm(request.POST)
         if form.is_valid():
             form.save()
-            filter = Search.objects.last().location
-            marker_data = add_markers(filter)
-            return JsonResponse({'markers': marker_data})
+            request.session['filter'] = Search.objects.last().location
+            marker_data = add_markers(filter=request.session.get('filter'))
+            return JsonResponse({'status': 'success', 'markers': marker_data})
     else:
         form = SearchForm()
 
