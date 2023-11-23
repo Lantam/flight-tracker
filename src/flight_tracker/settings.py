@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'map.apps.MapConfig',
     'django_celery_results',
     'django_celery_beat',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -162,7 +163,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    )
 }
 
 
