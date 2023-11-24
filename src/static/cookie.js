@@ -1,5 +1,9 @@
-export const getCookie = (name) => {
-    let cookieValue = null;
+let cookieValue = null;
+
+export const generateCookie = (name) => {
+    if (cookieValue) {
+        return cookieValue;
+    }
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
@@ -11,5 +15,10 @@ export const getCookie = (name) => {
             }
         }
     }
+    return cookieValue;
+};
+
+
+export const getCookie = () => {
     return cookieValue;
 };

@@ -1,98 +1,63 @@
-import * as mapFunctions from './map.js';
-import * as geolocationFunctions from './get_user_location.js';
-import * as cookieFunctions from './cookie.js';
+import { initializeMap, addMarkersOnZoomMove, getFilterElevation, getFilterBounds, updateMarkers } from './map.js';
+import { getCurrentLocation, successCallback, errorCallback } from './get_user_location.js';
+import { getCookie } from './cookie.js';
+import { initializeFilterValues, getFilterValues, addFilterValue, addFilterButton } from './filter.js';
 
-const csrftoken = cookieFunctions.getCookie('csrftoken');
-const map = mapFunctions.initializeMap();
 
-geolocationFunctions.getCurrentLocation(
-    geolocationFunctions.successCallback,
-    geolocationFunctions.errorCallback
+const csrftoken = getCookie('csrftoken');
+const map = initializeMap();
+
+getCurrentLocation(
+    successCallback,
+    errorCallback
 );
 
-mapFunctions.addMarkersOnZoomMove(map, csrftoken);
+addMarkersOnZoomMove(map, csrftoken);
+initializeFilterValues(map);
 
 
 document.getElementById('search-form').addEventListener('submit', function (event) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const locationValue = formData.get('location');
-    const formDataObject = {};
-    formData.forEach((value, key) => {
-        formDataObject[key] = value;
-    });
-    let zoomLevel = map.getZoom();
-    let bounds = map.getBounds();
+    const formValue = formData.get('location');
 
-    fetch('', {
-        method: 'POST',
+    const filterValues = getFilterValues();
+    filterValues.push(formValue);
+    addFilterValue(filterValues);
+    const updatedFilterValues = getFilterValues();
+
+    const elevationFilterValue = getFilterElevation(map)
+    const [southWestBounds, northEastBounds] = getFilterBounds(map);
+
+    const params = new URLSearchParams({
+        elevation__gte: elevationFilterValue,
+        latitude__gte: southWestBounds.lat,
+        latitude__lte: northEastBounds.lat,
+        longitude__gte: southWestBounds.lng,
+        longitude__lte: northEastBounds.lng,
+    });
+
+    if (updatedFilterValues.length > 0) {
+        params.set('search', updatedFilterValues.join(','));
+    }
+
+    let url = `api/api/?${params.toString()}`;
+
+    fetch(url, {
+        method: 'GET',
         credentials: 'same-origin',
         headers: {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRFToken': csrftoken,
         },
-        body: JSON.stringify({ form_data: formDataObject, filter_value: locationValue, zoom_level: zoomLevel, bounds: bounds }),
     })
     .then(response => response.json())
     .then(data => {
-        mapFunctions.updateMarkers(map, data.markers);
-        addFilter(data.filters)
+        updateMarkers(map, data);
+        addFilterButton(map, formValue);
     })
     .catch(error => {
         console.log('Error: ', error);
-        console.log('Response Text:', error.responseText);
     });
 });
-
-
-function addRemoveFilterListeners() {
-    let removeFilterButtons = document.querySelectorAll('.remove-filter');
-    removeFilterButtons.forEach(function (button) {
-      button.addEventListener('click', function () {
-        let filterValue = this.getAttribute('data-filter');
-        console.log(filterValue)
-        removeFilter(filterValue);
-      });
-    });
-  }
-
-
-function addFilter(filterValue) {
-    let filterList = document.getElementById('filter-list');
-    let newFilterItem = document.createElement('li');
-    newFilterItem.innerHTML = `${filterValue}<button class="remove-filter" data-filter="${filterValue}">X</button>`;
-    filterList.appendChild(newFilterItem);
-
-    addRemoveFilterListeners();
-}
-
-
-function removeFilter(filterValue) {
-    let filterList = document.getElementById('filter-list');
-    let filterToRemove = document.querySelector(`[data-filter="${filterValue}"]`);
-    let zoomLevel = map.getZoom();
-    let bounds = map.getBounds();
-
-    fetch('remove-filter', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': csrftoken,
-        },
-        body: JSON.stringify({ filter_value: filterValue, zoom_level: zoomLevel, bounds: bounds }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log('AJAX response:', data);
-        if (data.status === 'success') {
-            filterList.removeChild(filterToRemove.parentNode);
-            mapFunctions.updateMarkers(map, data.markers)
-        }
-      })
-      .catch(error => {
-          console.error('Error:', error);
-      });
-}
