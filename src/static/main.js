@@ -19,7 +19,7 @@ initializeFilterValues(map);
 document.getElementById('search-form').addEventListener('submit', function (event) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const formValue = formData.get('location');
+    const formValue = formData.get('filter');
 
     const filterValues = getFilterValues();
     filterValues.push(formValue);

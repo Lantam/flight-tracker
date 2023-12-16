@@ -42,8 +42,7 @@
                 </li>
             </ul>
             <form class="d-flex" id="search-form" role="search" method="POST">
-                {% csrf_token %}
-                {{form}}
+                <input type="text" name="filter" id="filter">
                 <button class="btn btn-outline-success mx-3" type="submit">Search</button>
             </form>
             </div>
