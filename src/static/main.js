@@ -12,7 +12,7 @@ getCurrentLocation(
     errorCallback
 );
 
-addMarkersOnZoomMove(map, csrftoken);
+addMarkersOnZoomMove(map, true);
 initializeFilterValues(map);
 
 

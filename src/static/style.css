@@ -1,4 +1,5 @@
-#map {
-    height: 50vh;
-    background-color: aqua;
+.custom-icon img {
+    width: 35px;
+    height: 35px;
+    transform-origin: center center;
 }
