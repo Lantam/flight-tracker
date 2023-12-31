@@ -9,11 +9,11 @@ export const initializeMap = () => {
         mapInstance = L.map('map',{
             maxBounds: [[-90, -Infinity], [90, Infinity],],
             maxBoundsViscosity: 1.0,
-        }).setView([0, 0], 2);
+        }).setView([0, 0], 3);
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
-            minZoom: 2,
+            minZoom: 3,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         }).addTo(mapInstance);
     }
@@ -27,7 +27,7 @@ const createCustomIcon = (iconUrl, rotationAngle) => {
         className: 'custom-icon',
         iconSize: [35, 35],
         iconAnchor: [17.5, 17.5],
-        html: `<img src="${iconUrl}" style="width: ${35}px; height: ${35}px; transform: rotate(${rotationAngle+60}deg);">`,
+        html: `<img src="${iconUrl}" style="width: ${35}px; height: ${35}px; transform: rotate(${rotationAngle}deg);">`, //+60
     })
 };
 
@@ -40,7 +40,8 @@ export const updateMarkers = (map, data) => {
     });
 
     const [southWestBounds, northEastBounds] = getFilterBounds(map);
-    const multiplier = worldCounter(southWestBounds.lng);
+    const multiplierSW = worldCounter(southWestBounds.lng);
+    const multiplierNE = worldCounter(northEastBounds.lng);
     const counter = mapscounter(southWestBounds.lng, northEastBounds.lng);
 
     const createPopupContent = markerData => `
@@ -64,18 +65,14 @@ export const updateMarkers = (map, data) => {
     };
 
     for (let markerData of data) {
-        if (southWestBounds.lng < -180) {
-            if (markerData.longitude > southWestBounds.lng && ((360 * -multiplier)+180) < northEastBounds.lng) {
-                for (let i = 0; i < counter; i++) {
-                    createAndAddMarker(markerData.latitude, markerData.longitude - (360 * (multiplier - i)), markerData.head_direction, markerData)
-                }
+        if (markerData.longitude > southWestBounds.lng && ((360 * -multiplierSW)+180) > southWestBounds.lng) {
+            for (let i = 0; i < counter; i++) {
+                createAndAddMarker(markerData.latitude, markerData.longitude - (360 * (multiplierSW - i)), markerData.head_direction, markerData)
             }
         }
-        if (northEastBounds.lng > 180) {
-            if (markerData.longitude < northEastBounds.lng && ((360 * multiplier)-180) < southWestBounds.lng) {
-                for (let i = 0; i < counter; i++) {
-                    createAndAddMarker(markerData.latitude, markerData.longitude + (360 * (multiplier + i)), markerData.head_direction, markerData)
-                }
+        if (markerData.longitude < northEastBounds.lng && ((360 * multiplierNE)-180) < northEastBounds.lng) {
+            for (let i = 0; i < counter; i++) {
+                createAndAddMarker(markerData.latitude, markerData.longitude + (360 * (multiplierNE - i)), markerData.head_direction, markerData)
             }
         }
     }
@@ -86,7 +83,7 @@ export const getFilterElevation = (map) => {
     const elevation_mapping = {
         1: 14000,
         2: 14000,
-        3: 13500,
+        3: 14000,
         4: 13000,
         5: 12000,
         6: 10000,
